@@ -1,0 +1,774 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[ABlog]]></title>
+  <link href="http://www.shirui.me/atom.xml" rel="self"/>
+  <link href="http://www.shirui.me/"/>
+  <updated>2013-01-31T21:01:42+08:00</updated>
+  <id>http://www.shirui.me/</id>
+  <author>
+    <name><![CDATA[施睿]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[cl任意日期计算星期几]]></title>
+    <link href="http://www.shirui.me/blog/2013/01/26/clren-yi-ri-qi-ji-suan-xing-qi-ji/"/>
+    <updated>2013-01-26T15:20:00+08:00</updated>
+    <id>http://www.shirui.me/blog/2013/01/26/clren-yi-ri-qi-ji-suan-xing-qi-ji</id>
+    <content type="html"><![CDATA[<!--more-->
+
+
+<p>Common Lisp实现输入日期计算当天是星期几，并可以计算从某年一月一日起算当天是当年第几天和任意两个日期之间差异。    <br/>
+<code>(day-count-in-year month day year)</code>计算同年该日期是第几天。      <br/>
+<code>(day-count-all m-initial d-initial y-initial m-final d-final y-final)</code>计算任意两天之间差多少天。    <br/>
+<code>(week-days-indicator month day year)</code>计算当天是星期几。     <br/>
+包含了1752年9月的特殊(<code>cal 9 1752</code>看看)，并且考虑到了1800年前后整百年份闰年定义方法的不同（1800年以后整百年份是整除400方为闰年，以前只要是整除4即是)。     <br/>
+P.S.最后<code>(dairy year)</code>是苦逼屌丝周年日记。XD</p>
+
+<figure class='code'><figcaption><span>ds.lisp</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="p">(</span><span class="n">defun</span> <span class="n">month</span><span class="o">-</span><span class="n">length</span> <span class="p">(</span><span class="n">month</span> <span class="n">year</span><span class="p">)</span> <span class="p">;;</span><span class="err">月长，</span><span class="mi">1800</span><span class="err">年以前的闰年算法不一样……</span><span class="n">shit</span>
+</span><span class='line'>  <span class="p">(</span><span class="n">case</span> <span class="n">month</span>
+</span><span class='line'>    <span class="p">((</span><span class="mi">1</span> <span class="mi">3</span> <span class="mi">5</span> <span class="mi">7</span> <span class="mi">8</span> <span class="mi">10</span> <span class="mi">12</span><span class="p">)</span> <span class="mi">31</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">(</span><span class="mi">9</span> <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="o">=</span> <span class="n">year</span> <span class="mi">1752</span><span class="p">)</span> <span class="mi">19</span> <span class="mi">30</span><span class="p">))</span>
+</span><span class='line'>    <span class="p">(</span><span class="mi">2</span> <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="o">&gt;</span> <span class="mi">1800</span> <span class="n">year</span><span class="p">)</span> <span class="p">(</span><span class="n">progn</span> <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="o">=</span> <span class="p">(</span><span class="n">mod</span> <span class="n">year</span> <span class="mi">4</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span> <span class="mi">29</span> <span class="mi">28</span><span class="p">))</span> <span class="p">(</span><span class="n">progn</span> <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="o">=</span> <span class="p">(</span><span class="n">mod</span> <span class="n">year</span> <span class="mi">100</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span> <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="o">=</span> <span class="p">(</span><span class="n">mod</span> <span class="n">year</span> <span class="mi">400</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span> <span class="mi">29</span> <span class="mi">28</span><span class="p">)</span> <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="o">=</span> <span class="p">(</span><span class="n">mod</span> <span class="n">year</span> <span class="mi">4</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span> <span class="mi">29</span> <span class="mi">28</span><span class="p">)))))</span>
+</span><span class='line'>    <span class="p">((</span><span class="mi">4</span> <span class="mi">6</span> <span class="mi">11</span><span class="p">)</span> <span class="mi">30</span><span class="p">)))</span>
+</span><span class='line'><span class="p">(</span><span class="n">defun</span> <span class="n">year</span><span class="o">-</span><span class="n">length</span> <span class="p">(</span><span class="n">year</span><span class="p">)</span> <span class="p">;;</span><span class="err">年长</span>
+</span><span class='line'>  <span class="p">(</span><span class="n">case</span> <span class="n">year</span>
+</span><span class='line'>    <span class="p">(</span><span class="mi">1752</span> <span class="mi">355</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">(</span><span class="n">otherwise</span> <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="o">&gt;</span> <span class="mi">1800</span> <span class="n">year</span><span class="p">)</span> <span class="p">(</span><span class="n">progn</span> <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="o">=</span> <span class="p">(</span><span class="n">mod</span> <span class="n">year</span> <span class="mi">4</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span> <span class="mi">366</span> <span class="mi">365</span><span class="p">))</span> <span class="p">(</span><span class="n">progn</span> <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="o">=</span> <span class="p">(</span><span class="n">mod</span> <span class="n">year</span> <span class="mi">100</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span> <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="o">=</span> <span class="p">(</span><span class="n">mod</span> <span class="n">year</span> <span class="mi">400</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span> <span class="mi">366</span> <span class="mi">365</span><span class="p">)</span> <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="o">=</span> <span class="p">(</span><span class="n">mod</span> <span class="n">year</span> <span class="mi">4</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span> <span class="mi">366</span> <span class="mi">365</span><span class="p">)))))))</span>
+</span><span class='line'><span class="p">(</span><span class="n">defun</span> <span class="n">day</span><span class="o">-</span><span class="n">count</span><span class="o">-</span><span class="ow">in</span><span class="o">-</span><span class="n">year</span> <span class="p">(</span><span class="n">month</span> <span class="n">day</span> <span class="n">year</span><span class="p">)</span> <span class="p">;;</span><span class="err">同一年内从</span><span class="mi">1</span><span class="err">月</span><span class="mi">1</span><span class="err">起算日数</span>
+</span><span class='line'>  <span class="p">(</span><span class="n">case</span> <span class="n">year</span>
+</span><span class='line'>    <span class="p">(</span><span class="mi">1752</span> <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="o">=</span> <span class="n">month</span> <span class="mi">1</span><span class="p">)</span> <span class="n">day</span>
+</span><span class='line'>        <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="o">=</span> <span class="n">month</span> <span class="mi">9</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="o">&lt;=</span> <span class="n">day</span> <span class="mi">2</span><span class="p">)</span> <span class="p">(</span><span class="o">+</span> <span class="n">day</span> <span class="p">(</span><span class="n">loop</span> <span class="k">for</span> <span class="n">mon</span> <span class="kn">from</span> <span class="mi">1</span> <span class="n">to</span> <span class="p">(</span><span class="o">-</span> <span class="n">month</span> <span class="mi">1</span><span class="p">)</span> <span class="n">summing</span> <span class="p">(</span><span class="n">month</span><span class="o">-</span><span class="n">length</span> <span class="n">mon</span> <span class="n">year</span><span class="p">)))</span> <span class="p">(</span><span class="o">-</span> <span class="p">(</span><span class="o">+</span> <span class="n">day</span> <span class="p">(</span><span class="n">loop</span> <span class="k">for</span> <span class="n">mon</span> <span class="kn">from</span> <span class="mi">1</span> <span class="n">to</span> <span class="p">(</span><span class="o">-</span> <span class="n">month</span> <span class="mi">1</span><span class="p">)</span> <span class="n">summing</span> <span class="p">(</span><span class="n">month</span><span class="o">-</span><span class="n">length</span> <span class="n">mon</span> <span class="n">year</span><span class="p">)))</span> <span class="mi">11</span><span class="p">))</span>
+</span><span class='line'>        <span class="p">(</span><span class="o">+</span> <span class="n">day</span> <span class="p">(</span><span class="n">loop</span> <span class="k">for</span> <span class="n">mon</span> <span class="kn">from</span> <span class="mi">1</span> <span class="n">to</span> <span class="p">(</span><span class="o">-</span> <span class="n">month</span> <span class="mi">1</span><span class="p">)</span> <span class="n">summing</span> <span class="p">(</span><span class="n">month</span><span class="o">-</span><span class="n">length</span> <span class="n">mon</span> <span class="n">year</span><span class="p">))))))</span>
+</span><span class='line'>    <span class="p">(</span><span class="n">otherwise</span> <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="o">=</span> <span class="n">month</span> <span class="mi">1</span><span class="p">)</span> <span class="n">day</span> <span class="p">(</span><span class="o">+</span> <span class="n">day</span> <span class="p">(</span><span class="n">loop</span> <span class="k">for</span> <span class="n">mon</span> <span class="kn">from</span> <span class="mi">1</span> <span class="n">to</span> <span class="p">(</span><span class="o">-</span> <span class="n">month</span> <span class="mi">1</span><span class="p">)</span> <span class="n">summing</span> <span class="p">(</span><span class="n">month</span><span class="o">-</span><span class="n">length</span> <span class="n">mon</span> <span class="n">year</span><span class="p">)))))))</span>
+</span><span class='line'><span class="p">(</span><span class="n">defun</span> <span class="n">day</span><span class="o">-</span><span class="n">count</span><span class="o">-</span><span class="nb">all</span> <span class="p">(</span><span class="n">month</span><span class="o">-</span><span class="n">initial</span> <span class="n">day</span><span class="o">-</span><span class="n">initial</span> <span class="n">year</span><span class="o">-</span><span class="n">initial</span> <span class="n">month</span><span class="o">-</span><span class="n">final</span> <span class="n">day</span><span class="o">-</span><span class="n">final</span> <span class="n">year</span><span class="o">-</span><span class="n">final</span><span class="p">)</span> <span class="p">;;</span><span class="err">任意两个日期相差日数</span>
+</span><span class='line'>  <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="o">=</span> <span class="n">year</span><span class="o">-</span><span class="n">initial</span> <span class="n">year</span><span class="o">-</span><span class="n">final</span><span class="p">)</span>
+</span><span class='line'>      <span class="p">(</span><span class="o">-</span> <span class="p">(</span><span class="n">day</span><span class="o">-</span><span class="n">count</span><span class="o">-</span><span class="ow">in</span><span class="o">-</span><span class="n">year</span> <span class="n">month</span><span class="o">-</span><span class="n">final</span> <span class="n">day</span><span class="o">-</span><span class="n">final</span> <span class="n">year</span><span class="o">-</span><span class="n">final</span><span class="p">)</span> <span class="p">(</span><span class="n">day</span><span class="o">-</span><span class="n">count</span><span class="o">-</span><span class="ow">in</span><span class="o">-</span><span class="n">year</span> <span class="n">month</span><span class="o">-</span><span class="n">initial</span> <span class="n">day</span><span class="o">-</span><span class="n">initial</span> <span class="n">year</span><span class="o">-</span><span class="n">initial</span><span class="p">))</span>
+</span><span class='line'>      <span class="p">(</span><span class="o">-</span>
+</span><span class='line'>  <span class="p">(</span><span class="o">+</span> <span class="p">(</span><span class="n">day</span><span class="o">-</span><span class="n">count</span><span class="o">-</span><span class="ow">in</span><span class="o">-</span><span class="n">year</span> <span class="n">month</span><span class="o">-</span><span class="n">final</span> <span class="n">day</span><span class="o">-</span><span class="n">final</span> <span class="n">year</span><span class="o">-</span><span class="n">final</span><span class="p">)</span> <span class="p">(</span><span class="n">loop</span> <span class="k">for</span> <span class="n">year</span> <span class="kn">from</span> <span class="nn">year</span><span class="o">-</span><span class="n">initial</span> <span class="n">to</span> <span class="p">(</span><span class="o">-</span> <span class="n">year</span><span class="o">-</span><span class="n">final</span> <span class="mi">1</span><span class="p">)</span> <span class="n">summing</span> <span class="p">(</span><span class="n">year</span><span class="o">-</span><span class="n">length</span> <span class="n">year</span><span class="p">)))</span>
+</span><span class='line'>  <span class="p">(</span><span class="n">day</span><span class="o">-</span><span class="n">count</span><span class="o">-</span><span class="ow">in</span><span class="o">-</span><span class="n">year</span> <span class="n">month</span><span class="o">-</span><span class="n">initial</span> <span class="n">day</span><span class="o">-</span><span class="n">initial</span> <span class="n">year</span><span class="o">-</span><span class="n">initial</span><span class="p">))))</span>
+</span><span class='line'><span class="p">(</span><span class="n">defun</span> <span class="n">week</span><span class="o">-</span><span class="n">days</span><span class="o">-</span><span class="n">after</span><span class="o">-</span><span class="mi">1752</span><span class="o">-</span><span class="mi">9</span> <span class="p">(</span><span class="n">daynum</span><span class="p">)</span> <span class="p">;;</span><span class="err">以</span><span class="mi">1752</span><span class="err">年为基准计算星期</span>
+</span><span class='line'>  <span class="p">(</span><span class="n">case</span> <span class="p">(</span><span class="n">mod</span> <span class="n">daynum</span> <span class="mi">7</span><span class="p">)</span> <span class="p">(</span><span class="mi">0</span> <span class="s">&quot;星期四&quot;</span><span class="p">)</span> <span class="p">(</span><span class="mi">1</span> <span class="s">&quot;星期五&quot;</span><span class="p">)</span> <span class="p">(</span><span class="mi">2</span> <span class="s">&quot;星期六&quot;</span><span class="p">)</span> <span class="p">(</span><span class="mi">3</span> <span class="s">&quot;星期天&quot;</span><span class="p">)</span> <span class="p">(</span><span class="mi">4</span> <span class="s">&quot;星期一&quot;</span><span class="p">)</span> <span class="p">(</span><span class="mi">5</span> <span class="s">&quot;星期二&quot;</span><span class="p">)</span> <span class="p">(</span><span class="mi">6</span> <span class="s">&quot;星期三&quot;</span><span class="p">)))</span>
+</span><span class='line'><span class="p">(</span><span class="n">defun</span> <span class="n">week</span><span class="o">-</span><span class="n">days</span><span class="o">-</span><span class="n">before</span><span class="o">-</span><span class="mi">1752</span><span class="o">-</span><span class="mi">9</span> <span class="p">(</span><span class="n">daynum</span><span class="p">)</span> <span class="p">;;</span><span class="err">以</span><span class="mi">1752</span><span class="err">年为标准计算星期</span>
+</span><span class='line'>  <span class="p">(</span><span class="n">case</span> <span class="p">(</span><span class="n">mod</span> <span class="n">daynum</span> <span class="mi">7</span><span class="p">)</span> <span class="p">(</span><span class="mi">6</span> <span class="s">&quot;星期四&quot;</span><span class="p">)</span> <span class="p">(</span><span class="mi">5</span> <span class="s">&quot;星期五&quot;</span><span class="p">)</span> <span class="p">(</span><span class="mi">4</span> <span class="s">&quot;星期六&quot;</span><span class="p">)</span> <span class="p">(</span><span class="mi">3</span> <span class="s">&quot;星期天&quot;</span><span class="p">)</span> <span class="p">(</span><span class="mi">2</span> <span class="s">&quot;星期一&quot;</span><span class="p">)</span> <span class="p">(</span><span class="mi">1</span> <span class="s">&quot;星期二&quot;</span><span class="p">)</span> <span class="p">(</span><span class="mi">0</span> <span class="s">&quot;星期三&quot;</span><span class="p">)))</span>
+</span><span class='line'><span class="p">(</span><span class="n">defun</span> <span class="n">week</span><span class="o">-</span><span class="n">days</span><span class="o">-</span><span class="n">indicator</span> <span class="p">(</span><span class="n">month</span> <span class="n">day</span> <span class="n">year</span><span class="p">)</span> <span class="p">;;</span><span class="err">输出任意月</span><span class="o">/</span><span class="err">日</span><span class="o">/</span><span class="err">年对应星期几</span>
+</span><span class='line'>  <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="n">string</span><span class="o">&gt;</span> <span class="p">(</span><span class="n">format</span> <span class="n">nil</span> <span class="s">&quot;~4,&#39;0d~2,&#39;0d~2,&#39;0d~%&quot;</span> <span class="n">year</span> <span class="n">month</span> <span class="n">day</span><span class="p">)</span> <span class="s">&quot;17520902&quot;</span><span class="p">)</span>
+</span><span class='line'>      <span class="p">(</span><span class="n">week</span><span class="o">-</span><span class="n">days</span><span class="o">-</span><span class="n">after</span><span class="o">-</span><span class="mi">1752</span><span class="o">-</span><span class="mi">9</span> <span class="p">(</span><span class="n">day</span><span class="o">-</span><span class="n">count</span><span class="o">-</span><span class="nb">all</span> <span class="mi">9</span> <span class="mi">14</span> <span class="mi">1752</span> <span class="n">month</span> <span class="n">day</span> <span class="n">year</span><span class="p">))</span>
+</span><span class='line'>      <span class="p">(</span><span class="n">week</span><span class="o">-</span><span class="n">days</span><span class="o">-</span><span class="n">before</span><span class="o">-</span><span class="mi">1752</span><span class="o">-</span><span class="mi">9</span> <span class="p">(</span><span class="n">day</span><span class="o">-</span><span class="n">count</span><span class="o">-</span><span class="nb">all</span> <span class="n">month</span> <span class="n">day</span> <span class="n">year</span> <span class="mi">9</span> <span class="mi">2</span> <span class="mi">1752</span><span class="p">))))</span>
+</span><span class='line'><span class="p">(</span><span class="n">defvar</span> <span class="o">*</span><span class="n">what2do</span><span class="o">*</span> <span class="n">nil</span><span class="p">)</span>
+</span><span class='line'><span class="p">(</span><span class="n">defun</span> <span class="n">things</span> <span class="p">()</span> <span class="p">;;</span><span class="err">连续喜当爹问题让我搞定了，现在是概率问题和我期望设计的”周一到周五工作，周六周日撸管子有点冲突……怎么都不完美……“</span>
+</span><span class='line'>  <span class="p">(</span><span class="n">case</span> <span class="p">(</span><span class="n">random</span> <span class="mi">4</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">(</span><span class="mi">0</span>
+</span><span class='line'>     <span class="p">(</span><span class="n">push</span> <span class="s">&quot;搬砖、撸管子、意淫女神&quot;</span> <span class="o">*</span><span class="n">what2do</span><span class="o">*</span><span class="p">)</span>
+</span><span class='line'>     <span class="p">(</span><span class="n">push</span> <span class="s">&quot;完事儿又被女神甩掉了&quot;</span> <span class="o">*</span><span class="n">what2do</span><span class="o">*</span><span class="p">)</span>
+</span><span class='line'>     <span class="p">(</span><span class="n">push</span> <span class="s">&quot;只好陪女神去医院&quot;</span> <span class="o">*</span><span class="n">what2do</span><span class="o">*</span><span class="p">)</span>
+</span><span class='line'>     <span class="p">(</span><span class="n">push</span> <span class="s">&quot;悲剧，原来是喜当爹了&quot;</span> <span class="o">*</span><span class="n">what2do</span><span class="o">*</span><span class="p">)</span>
+</span><span class='line'>     <span class="p">(</span><span class="n">push</span> <span class="s">&quot;女神主动找我聊QQ，春天终于来了&quot;</span> <span class="o">*</span><span class="n">what2do</span><span class="o">*</span><span class="p">)</span>
+</span><span class='line'>     <span class="p">(</span><span class="n">push</span> <span class="s">&quot;搬砖、撸管子、意淫女神&quot;</span> <span class="o">*</span><span class="n">what2do</span><span class="o">*</span><span class="p">)</span>
+</span><span class='line'>     <span class="p">(</span><span class="n">push</span> <span class="s">&quot;搬砖、撸管子、意淫女神&quot;</span> <span class="o">*</span><span class="n">what2do</span><span class="o">*</span><span class="p">))</span>
+</span><span class='line'>    <span class="p">(</span><span class="mi">1</span> <span class="p">(</span><span class="n">push</span> <span class="s">&quot;搬砖、撸管子、意淫女神&quot;</span> <span class="o">*</span><span class="n">what2do</span><span class="o">*</span><span class="p">)</span>
+</span><span class='line'>       <span class="p">(</span><span class="n">push</span> <span class="s">&quot;搬砖、撸管子、意淫女神&quot;</span> <span class="o">*</span><span class="n">what2do</span><span class="o">*</span><span class="p">)</span>
+</span><span class='line'>       <span class="p">(</span><span class="n">push</span> <span class="s">&quot;搬砖、撸管子、意淫女神&quot;</span> <span class="o">*</span><span class="n">what2do</span><span class="o">*</span><span class="p">)</span>
+</span><span class='line'>       <span class="p">(</span><span class="n">push</span> <span class="s">&quot;给我发了好人卡的女神又去找高富帅了&quot;</span> <span class="o">*</span><span class="n">what2do</span><span class="o">*</span><span class="p">)</span>
+</span><span class='line'>       <span class="p">(</span><span class="n">push</span> <span class="s">&quot;原来是因为女神分手了心情不好&quot;</span> <span class="o">*</span><span class="n">what2do</span><span class="o">*</span><span class="p">)</span>
+</span><span class='line'>       <span class="p">(</span><span class="n">push</span> <span class="s">&quot;女神终于接受我的表白&quot;</span> <span class="o">*</span><span class="n">what2do</span><span class="o">*</span><span class="p">)</span>
+</span><span class='line'>       <span class="p">(</span><span class="n">push</span> <span class="s">&quot;搬砖、撸管子、意淫女神&quot;</span> <span class="o">*</span><span class="n">what2do</span><span class="o">*</span><span class="p">))</span>
+</span><span class='line'>    <span class="p">(</span><span class="mi">2</span> <span class="p">(</span><span class="n">push</span> <span class="s">&quot;搬砖、撸管子、意淫女神&quot;</span> <span class="o">*</span><span class="n">what2do</span><span class="o">*</span><span class="p">)</span>
+</span><span class='line'>       <span class="p">(</span><span class="n">push</span> <span class="s">&quot;搬砖、撸管子、意淫女神&quot;</span> <span class="o">*</span><span class="n">what2do</span><span class="o">*</span><span class="p">)</span>
+</span><span class='line'>       <span class="p">(</span><span class="n">push</span> <span class="s">&quot;和女神聊QQ，被</span><span class="se">\&quot;</span><span class="s">吃饭呵呵去洗澡</span><span class="se">\&quot;</span><span class="s">&quot;</span> <span class="o">*</span><span class="n">what2do</span><span class="o">*</span><span class="p">)</span>
+</span><span class='line'>       <span class="p">(</span><span class="n">push</span> <span class="s">&quot;搬砖、撸管子、意淫女神&quot;</span> <span class="o">*</span><span class="n">what2do</span><span class="o">*</span><span class="p">)</span>
+</span><span class='line'>       <span class="p">(</span><span class="n">push</span> <span class="s">&quot;搬砖、撸管子、意淫女神&quot;</span> <span class="o">*</span><span class="n">what2do</span><span class="o">*</span><span class="p">)</span>
+</span><span class='line'>       <span class="p">(</span><span class="n">push</span> <span class="s">&quot;搬砖、撸管子、意淫女神&quot;</span> <span class="o">*</span><span class="n">what2do</span><span class="o">*</span><span class="p">)</span>
+</span><span class='line'>       <span class="p">(</span><span class="n">push</span> <span class="s">&quot;搬砖、撸管子、意淫女神&quot;</span> <span class="o">*</span><span class="n">what2do</span><span class="o">*</span><span class="p">))</span>
+</span><span class='line'>    <span class="p">(</span><span class="mi">3</span> <span class="p">(</span><span class="n">push</span> <span class="s">&quot;搬砖、撸管子、意淫女神&quot;</span> <span class="o">*</span><span class="n">what2do</span><span class="o">*</span><span class="p">)</span>
+</span><span class='line'>       <span class="p">(</span><span class="n">push</span> <span class="s">&quot;搬砖、撸管子、意淫女神&quot;</span> <span class="o">*</span><span class="n">what2do</span><span class="o">*</span><span class="p">)</span>
+</span><span class='line'>       <span class="p">(</span><span class="n">push</span> <span class="s">&quot;搬砖、撸管子、意淫女神&quot;</span> <span class="o">*</span><span class="n">what2do</span><span class="o">*</span><span class="p">)</span>
+</span><span class='line'>       <span class="p">(</span><span class="n">push</span> <span class="s">&quot;搬砖、撸管子、意淫女神&quot;</span> <span class="o">*</span><span class="n">what2do</span><span class="o">*</span><span class="p">)</span>
+</span><span class='line'>       <span class="p">(</span><span class="n">push</span> <span class="s">&quot;和女神聊QQ，被</span><span class="se">\&quot;</span><span class="s">吃饭呵呵去洗澡</span><span class="se">\&quot;</span><span class="s">&quot;</span> <span class="o">*</span><span class="n">what2do</span><span class="o">*</span><span class="p">)</span>
+</span><span class='line'>       <span class="p">(</span><span class="n">push</span> <span class="s">&quot;搬砖、撸管子、意淫女神&quot;</span> <span class="o">*</span><span class="n">what2do</span><span class="o">*</span><span class="p">)</span>
+</span><span class='line'>       <span class="p">(</span><span class="n">push</span> <span class="s">&quot;搬砖、撸管子、意淫女神&quot;</span> <span class="o">*</span><span class="n">what2do</span><span class="o">*</span><span class="p">))))</span>
+</span><span class='line'><span class="p">(</span><span class="n">defun</span> <span class="n">write</span><span class="o">-</span><span class="n">db</span> <span class="p">()</span> <span class="p">(</span><span class="n">setf</span> <span class="o">*</span><span class="n">what2do</span><span class="o">*</span> <span class="n">nil</span><span class="p">)</span> <span class="p">(</span><span class="n">loop</span> <span class="n">repeat</span> <span class="mi">53</span> <span class="n">do</span> <span class="p">(</span><span class="n">things</span><span class="p">)))</span>
+</span><span class='line'><span class="p">(</span><span class="n">defun</span> <span class="n">dairy</span> <span class="p">(</span><span class="n">year</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">(</span><span class="n">write</span><span class="o">-</span><span class="n">db</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">(</span><span class="n">loop</span> <span class="k">for</span> <span class="n">mon</span> <span class="kn">from</span> <span class="mi">1</span> <span class="n">to</span> <span class="mi">12</span> <span class="n">do</span>
+</span><span class='line'>       <span class="p">(</span><span class="n">loop</span>
+</span><span class='line'>    <span class="k">for</span> <span class="n">day</span> <span class="kn">from</span> <span class="mi">1</span> <span class="n">to</span> <span class="p">(</span><span class="n">month</span><span class="o">-</span><span class="n">length</span> <span class="n">mon</span> <span class="n">year</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="o">*</span><span class="n">what2do</span><span class="o">*</span> <span class="n">do</span>
+</span><span class='line'>      <span class="p">(</span><span class="n">format</span> <span class="n">t</span> <span class="s">&quot;~2,&#39;0d~a~2,&#39;0d~a:~a~%&quot;</span> <span class="n">mon</span> <span class="s">&quot;月&quot;</span> <span class="n">day</span> <span class="p">(</span><span class="n">week</span><span class="o">-</span><span class="n">days</span><span class="o">-</span><span class="n">indicator</span> <span class="n">mon</span> <span class="n">day</span> <span class="n">year</span><span class="p">)</span> <span class="n">item</span><span class="p">))))</span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[python限时输入]]></title>
+    <link href="http://www.shirui.me/blog/2013/01/26/pythonxian-shi-shu-ru/"/>
+    <updated>2013-01-26T14:49:00+08:00</updated>
+    <id>http://www.shirui.me/blog/2013/01/26/pythonxian-shi-shu-ru</id>
+    <content type="html"><![CDATA[<!--more-->
+
+
+<p>使用threading模块实现限时输入：</p>
+
+<figure class='code'><figcaption><span>input_with_time_limit.py</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c">#!/usr/bin/env python</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">time</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">threading</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">os</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">exit</span><span class="p">(</span><span class="n">msg</span><span class="p">):</span>
+</span><span class='line'>    <span class="k">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">os</span><span class="o">.</span><span class="n">_exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">timer</span><span class="p">(</span><span class="n">limit</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">limit</span><span class="p">)</span>
+</span><span class='line'>    <span class="nb">exit</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="si">%s</span><span class="s">秒已过，超时 !&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">limit</span><span class="p">))</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">put</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
+</span><span class='line'>    <span class="n">t</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">timer</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">limit</span><span class="p">,</span> <span class="p">))</span>
+</span><span class='line'>    <span class="k">try</span> <span class="p">:</span>
+</span><span class='line'>        <span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+</span><span class='line'>        <span class="n">words</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s">&quot;你有</span><span class="si">%s</span><span class="s">秒输入：&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">limit</span><span class="p">))</span>
+</span><span class='line'>    <span class="k">except</span> <span class="ne">KeyboardInterrupt</span> <span class="p">:</span>
+</span><span class='line'>        <span class="k">pass</span>
+</span><span class='line'>    <span class="nb">exit</span><span class="p">(</span><span class="s">&quot;你输入了</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">words</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[无聊的段子(不定期更新)]]></title>
+    <link href="http://www.shirui.me/blog/2013/01/22/wu-liao-xie-zhao-wan-er-de/"/>
+    <updated>2013-01-22T22:32:00+08:00</updated>
+    <id>http://www.shirui.me/blog/2013/01/22/wu-liao-xie-zhao-wan-er-de</id>
+    <content type="html"><![CDATA[<!--more-->
+
+
+<h2>小侃救狗</h2>
+
+<p>老吾老以及人之老，幼吾幼以及人之幼——是谓仁圣。方今天下之远者有非洲之贫、中东之乱；近者有遇不公者不计其数者，然吾未见其爱其老幼之心也。今吾见竖子有不见人间凄苦而以狗之老为老，狗之幼者为幼，以儿唤狗者无数——其圣心已超乎人而布于六道也哉？——笑而不语，待有朝，狗治天下之时，此皆为圣狗也。</p>
+
+<h2>中国人都是元素周期表</h2>
+
+<p>晚归路踏五步蛇、反身啮踝。蛇身搐、曰：吾素以毒伤人畜命百、今虽死无憾、但求故。吾见其双目流血、命在须臾、乃曰：吾生而饮三聚氰胺牛乳、朝食地沟油油条、暮进吊白块大米、饮乃工业废水、酒乃甲醇勾兑、病则假冒疫苗、肉蛋果蔬、含避孕药、激素者不胜枚举…言未尽、蛇卒、双目不瞑、吾不忍、乃葬。</p>
+
+<h2>古诗串串</h2>
+
+<p>朕与先生解战袍，芙蓉帐暖度春宵。
+轻拢慢捻抹复挑，从此君王不早朝。</p>
+
+<p>在天愿作比翼鸟，大难临头各自飞。</p>
+
+<p>美人卷珠帘，万径人踪灭。两岸猿声啼不住，惊起蛙声一片。</p>
+
+<p>劝君更尽一杯酒，从此萧郎是路人。</p>
+
+<p>一朝被蛇咬，处处闻啼鸟。</p>
+
+<p>遥想公谨当年，小乔初嫁了，使我不得开心颜！</p>
+
+<h2>段子</h2>
+
+<p>男：我的第一个问题是，对於我第二个和第三个问题，你可不可以只用‘能’和‘不能’来回答？ 女：可以啊！ 男：我的第二个问题是，如果我的第三个问题是你能不能做我的女朋友，那麽你对於我的第三个问题的答案能不能和第二个问题的答案一样？ 女：&amp;@*#￥%&#8230;..</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[十三辙韵]]></title>
+    <link href="http://www.shirui.me/blog/2013/01/22/shi-san-che-yun/"/>
+    <updated>2013-01-22T22:27:00+08:00</updated>
+    <id>http://www.shirui.me/blog/2013/01/22/shi-san-che-yun</id>
+    <content type="html"><![CDATA[<!--more-->
+
+
+<p>曲艺中的十三辙是从韵母的角度，将现代汉语北京音系的音节分成为十三大类：  <br/>
+一、 中东辙，或叫中东韵（下同）：eng、ing、ong、iong、ueng  <br/>
+二、 江阳辙：ang、iang、uang  <br/>
+三、 人辰辙：en、in、uen、un  <br/>
+四、 言前辙：an、ian、uan  <br/>
+五、 由求辙：ou、iou、iu  <br/>
+六、 遥条辙：ao、iao  <br/>
+七、 灰堆辙：ei、uei、ui  <br/>
+八、 怀来辙：ai、uai  <br/>
+九、 发花辙：a、ia、ua  <br/>
+十、 缺斜辙：ie、ue  <br/>
+十一、 梭波辙：e、o、uo  <br/>
+十二、 衣七辙： i、u、er  <br/>
+十三、 姑苏辙：u</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Latex模板]]></title>
+    <link href="http://www.shirui.me/blog/2013/01/22/latexmo-ban/"/>
+    <updated>2013-01-22T22:11:00+08:00</updated>
+    <id>http://www.shirui.me/blog/2013/01/22/latexmo-ban</id>
+    <content type="html"><![CDATA[<!--more-->
+
+
+<figure class='code'><figcaption><span>template.tex</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+</pre></td><td class='code'><pre><code class='tex'><span class='line'><span class="k">\documentclass</span><span class="na">[UTF8,a4paper,winfonts,cs4size,oneside]</span><span class="nb">{</span>ctexart<span class="nb">}</span>
+</span><span class='line'><span class="k">\defaultfontfeatures</span><span class="nb">{</span>Mapping=tex-text<span class="nb">}</span>
+</span><span class='line'><span class="k">\usepackage</span><span class="nb">{</span>pdfpages<span class="nb">}</span>
+</span><span class='line'><span class="k">\usepackage</span><span class="nb">{</span>ifpdf<span class="nb">}</span>
+</span><span class='line'><span class="k">\usepackage</span><span class="nb">{</span>subfigure<span class="nb">}</span>
+</span><span class='line'><span class="k">\usepackage</span><span class="nb">{</span>listings<span class="nb">}</span>
+</span><span class='line'><span class="k">\usepackage</span>[<span class="c">%</span>
+</span><span class='line'>  pdfstartview=FitH,<span class="c">%</span>
+</span><span class='line'>  CJKbookmarks=true,<span class="c">%</span>
+</span><span class='line'>  bookmarks=true,<span class="c">%</span>
+</span><span class='line'>  bookmarksnumbered=true,<span class="c">%</span>
+</span><span class='line'>  bookmarksopen=true,<span class="c">%</span>
+</span><span class='line'>  colorlinks=true,<span class="c">%</span>
+</span><span class='line'>  citecolor=blue,<span class="c">%</span>
+</span><span class='line'>  linkcolor=blue,<span class="c">%</span>
+</span><span class='line'>  anchorcolor=green,<span class="c">%</span>
+</span><span class='line'>  urlcolor=blue<span class="c">%</span>
+</span><span class='line'>]<span class="nb">{</span>hyperref<span class="nb">}</span>
+</span><span class='line'><span class="k">\usepackage</span><span class="nb">{</span>graphicx<span class="nb">}</span>
+</span><span class='line'><span class="k">\usepackage</span><span class="nb">{</span>url<span class="nb">}</span>
+</span><span class='line'><span class="k">\usepackage</span><span class="nb">{</span>texnames<span class="nb">}</span>
+</span><span class='line'><span class="k">\topmargin</span> -0.5 true cm
+</span><span class='line'><span class="k">\oddsidemargin</span> 0 true cm
+</span><span class='line'><span class="k">\evensidemargin</span> 0 true cm
+</span><span class='line'><span class="k">\textheight</span> 23.5 true cm
+</span><span class='line'><span class="k">\textwidth</span> 16 true cm
+</span><span class='line'><span class="k">\usepackage</span><span class="nb">{</span>lastpage<span class="nb">}</span>
+</span><span class='line'><span class="k">\usepackage</span><span class="nb">{</span>fancyhdr<span class="nb">}</span>
+</span><span class='line'><span class="k">\pagestyle</span><span class="nb">{</span>fancy<span class="nb">}</span>
+</span><span class='line'><span class="k">\renewcommand</span><span class="nb">{</span><span class="k">\headrulewidth</span><span class="nb">}{</span>0.4pt<span class="nb">}</span>
+</span><span class='line'><span class="c">%\renewcommand{\footrulewidth}{0.4pt}</span>
+</span><span class='line'><span class="k">\begin</span><span class="nb">{</span>document<span class="nb">}</span>
+</span><span class='line'><span class="k">\lstset</span><span class="nb">{</span>numbers=left,
+</span><span class='line'>numberstyle=<span class="k">\tiny</span>,
+</span><span class='line'>keywordstyle=<span class="k">\color</span><span class="nb">{</span>blue!70<span class="nb">}</span>, commentstyle=<span class="k">\color</span><span class="nb">{</span>red!50!green!50!blue!50<span class="nb">}</span>,
+</span><span class='line'>frame=shadowbox,
+</span><span class='line'>rulesepcolor=<span class="k">\color</span><span class="nb">{</span>red!20!green!20!blue!20<span class="nb">}}</span>
+</span><span class='line'><span class="k">\lstset</span><span class="nb">{</span>language=C++<span class="nb">}</span><span class="c">%这条命令可以让LaTeX排版时将C++键字突出显示</span>
+</span><span class='line'><span class="k">\lstset</span><span class="nb">{</span>breaklines<span class="nb">}</span><span class="c">%这条命令可以让LaTeX自动将长的代码行换行排版</span>
+</span><span class='line'><span class="k">\lstset</span><span class="nb">{</span>extendedchars=false<span class="nb">}</span><span class="c">%这一条命令可以解决代码跨页时，章节标题，页眉等汉字不显示的问题</span>
+</span><span class='line'><span class="k">\CTEXsetup</span><span class="na">[name={第, 章}]</span><span class="nb">{</span>section<span class="nb">}</span>
+</span><span class='line'><span class="k">\CTEXsetup</span><span class="na">[number={\chinese{section}}]</span><span class="nb">{</span>section<span class="nb">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">\end</span><span class="nb">{</span>document<span class="nb">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Octopress设置]]></title>
+    <link href="http://www.shirui.me/blog/2013/01/22/octopress/"/>
+    <updated>2013-01-22T17:01:00+08:00</updated>
+    <id>http://www.shirui.me/blog/2013/01/22/octopress</id>
+    <content type="html"><![CDATA[<!--more-->
+
+
+<h2>Git设置</h2>
+
+<p>用以下命令会生成～/.ssh/id_rsa.pub文件：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>ssh-keygen -C <span class="s2">&quot;username@email.com&quot;</span> -t rsa
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在github网站选择“Account Settings”>>“SSH Public Keys”>>“Add another public key”，粘贴~/.ssh/id_rsa.pub里的内容。</p>
+
+<h2>安装octopress</h2>
+
+<p>下载并设置octopress</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>git clone git://github.com/imathis/octopress.git octopress
+</span><span class='line'><span class="nv">$ </span><span class="nb">cd </span>octopress
+</span><span class='line'><span class="nv">$ </span>ruby --version <span class="c"># 应该&gt;=1.9.2</span>
+</span><span class='line'><span class="nv">$ </span>gem install bundler <span class="c"># 可以把Gemfile的源修改成taobao：http://ruby.taobao.org/</span>
+</span><span class='line'><span class="nv">$ </span>bundle install
+</span><span class='line'><span class="nv">$ </span>rake install <span class="c"># 安装默认主题，找其他主题可以用rake install[&#39;themename&#39;]</span>
+</span><span class='line'><span class="nv">$ </span>rake setup_github_pages <span class="c"># 设置你有读写权限的git repo，格式它有提示，就是你repo的ssh选项(HTTP SSH Git Read-Only)那几个选项里的ssh</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>完成这一步以后你就可以用<code>rake new_post["title"]</code>创建新博文，在./source/_posts底下编辑你的文章，使用
+<code>rake generate</code>生成页面，<code>rake deploy</code>来发表；
+或者直接<code>rake gen_deploy</code>；每当你修改主题或者发表文章什么的都需要这么做。<strong>注意修改_config.yml里对应的信息，比如url就是你的xxxx.github.com等等。</strong></p>
+
+<h2>新浪微博插件</h2>
+
+<p>去<a href="http://weibo.com/tool/weiboshow">微博秀</a>生成一下代码，注意看里面对应的各种信息比如userid等等。然后在<code>./source/_includes/asides/</code>下建立一个weibo.html：</p>
+
+<figure class='code'><figcaption><span>weibo.html</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'>
+</span><span class='line'>{% if site.weibo_uid %}
+</span><span class='line'><span class="nt">&lt;section&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;ul</span> <span class="na">id=</span><span class="s">&quot;weibo&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;li&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;iframe</span>
+</span><span class='line'>        <span class="na">width=</span><span class="s">&quot;100%&quot;</span>
+</span><span class='line'>        <span class="na">height=</span><span class="s">&quot;110 默认550，我只要一个头像～&quot;</span>
+</span><span class='line'>        <span class="na">class=</span><span class="s">&quot;share_self&quot;</span>
+</span><span class='line'>        <span class="na">frameborder=</span><span class="s">&quot;0&quot;</span>
+</span><span class='line'>        <span class="na">scrolling=</span><span class="s">&quot;no&quot;</span>
+</span><span class='line'>        <span class="na">src=</span><span class="s">&quot;http://widget.weibo.com/weiboshow/index.php?width=0&amp;height=550&amp;ptype={% if site.weibo_pic %}1{% else %}0{% endif %}&amp;speed=0&amp;skin={{weibo_skin}}&amp;isTitle=0&amp;fansRow=2&amp;noborder=0&amp;isWeibo={% if site.weibo_show %}1{% else %}0{% endif %}&amp;isFans=0&amp;uid={{site.weibo_uid}}&amp;verifier={{site.weibo_verifier}}&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/iframe&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/li&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/ul&gt;</span>
+</span><span class='line'><span class="nt">&lt;/section&gt;</span>
+</span><span class='line'>{% endif %}
+</span><span class='line'><span class="c">&lt;!--src=这一行除了一些改为可以在_config.yml里设置的，其余的配置比如边框什么的具体对照新浪的生成，e.g. isfans=0表示不显示粉丝--&gt;</span>
+</span><span class='line'>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后在./_config.yml文件里添加</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>weibo_uid: userid               <span class="c"># 填入uid  </span>
+</span><span class='line'>weibo_verifier: verifier         <span class="c"># 填入verifier</span>
+</span><span class='line'>weibo_show: <span class="nb">false</span>      <span class="c"># 是否显示最近微博内容  </span>
+</span><span class='line'>weibo_pic: <span class="nb">true</span>          <span class="c"># 是否显示微博中的图片  </span>
+</span><span class='line'>weibo_skin: 2          <span class="c"># 使用哪种配色风格，数字为从1开始的微博秀风格序号</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>具体参数包括边框显示等等看微博秀给你生成的代码；接下来在_config.yml里的<code>default_asides: [.....]</code>一行里添加asides/weibo.html，其他用逗号隔开。</p>
+
+<h2>评论窗口</h2>
+
+<p>评论窗口默认是disqus，这个是octopress默认支持的，<strong>不需要任何其他配置</strong>，只要去disqus注册一个账户，然后添加你的网址（比如xxxx.github.com）然后写一个博客名，接下来就是第三个<strong>Site Shortname</strong>窗口，这个会生成一个<strong>your_short_name.disqus.com</strong>的网址，供你管理评论，这个是唯一的。
+然后在_config.yml里的</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># Disqus Comments</span>
+</span><span class='line'>disqus_short_name: your_short_name
+</span><span class='line'>disqus_show_comment_count: <span class="nb">true</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>里填写刚才的那个shortname，就可以了。</p>
+
+<p><strong>评论似乎还可以用多说，不过很多人不推荐，而且disqus是不需要什么设置的，只要填入shortname就可以了，比较方便，但它是全英文的界面。</strong></p>
+
+<p><strong>目前貌似disqus会挂……所以附上多说的部分，其实还有灯鹭和友言，不过大同小异——</strong>        <br/>
+首先在<code>./source/_layouts/post(还有page).html</code>里均<strong>添加如下内容在原有disqus那节下面</strong>(page.html是控制页面上是否出现评论，post.html是博文里是否出现评论，两个文件都需要添加)：</p>
+
+<figure class='code'><figcaption><span>page&post.html</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'>
+</span><span class='line'><span class="nt">&lt;div&gt;</span>
+</span><span class='line'><span class="nt">&lt;article</span> <span class="na">class=</span><span class="s">&quot;hentry&quot;</span> <span class="na">role=</span><span class="s">&quot;article&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'><span class="c">&lt;!--&gt;......上面接原有&lt;!--&gt;</span>
+</span><span class='line'>{% if site.disqus_short_name and page.comments == true %}
+</span><span class='line'>  <span class="nt">&lt;section&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;h1&gt;</span>Comments<span class="nt">&lt;/h1&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">&quot;disqus_thread&quot;</span> <span class="na">aria-live=</span><span class="s">&quot;polite&quot;</span><span class="nt">&gt;</span>{% include post/disqus_thread.html %}<span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/section&gt;</span>
+</span><span class='line'>{% endif %}
+</span><span class='line'><span class="c">&lt;!--&gt;接disqus~~添加如下部分：&lt;!--&gt;</span>
+</span><span class='line'>{% if site.youyan_show_comment_count == true and page.comments == true %}
+</span><span class='line'>    <span class="nt">&lt;section&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;h1&gt;</span>发表评论<span class="nt">&lt;/h1&gt;</span>
+</span><span class='line'>        {% include youyan.html %}
+</span><span class='line'>    <span class="nt">&lt;/section&gt;</span>
+</span><span class='line'>{% endif %}
+</span><span class='line'>{% if site.denglu_show_comment_count == true and page.comments == true %}
+</span><span class='line'>    <span class="nt">&lt;section&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;h1&gt;</span>发表评论<span class="nt">&lt;/h1&gt;</span>
+</span><span class='line'>        {% include denglu.html %}
+</span><span class='line'>    <span class="nt">&lt;/section&gt;</span>
+</span><span class='line'>{% endif %}
+</span><span class='line'>{% if site.duoshuo_show_comment_count == true and page.comments == true %}
+</span><span class='line'>    <span class="nt">&lt;section&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;h1&gt;</span>发表评论<span class="nt">&lt;/h1&gt;</span>
+</span><span class='line'>        {% include duoshuo.html %}
+</span><span class='line'>    <span class="nt">&lt;/section&gt;</span>
+</span><span class='line'>{% endif %}
+</span><span class='line'><span class="c">&lt;!--&gt;添加部分结束&lt;!--&gt;</span>
+</span><span class='line'><span class="nt">&lt;/div&gt;</span> <span class="c">&lt;!--&gt;整个在&lt;div&gt;&lt;article....一节里，不然“发表评论”四个字会顶格。&lt;!--&gt;</span>
+</span><span class='line'>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后在<code>./_config.yml</code>里添加</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>youyan_show_comment_count: <span class="nb">false</span>
+</span><span class='line'>denglu_show_comment_count: <span class="nb">false</span>
+</span><span class='line'>duoshuo_show_comment_count: <span class="nb">true</span> <span class="c"># 我用了多说</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接下来在<code>./source/_includes/</code>里新建一个duoshuo.html(或者youyan.html或者denglu.html，具体看你)   <br/>
+因为这些都需要注册，代码里都带有userid，我就不贴出了；注册完毕以后网站会提供你代码，分别粘贴到这些html文件里就行。</p>
+
+<h2>分享按钮</h2>
+
+<p>然后是分享按钮，这个因为octopress默认支持的都是Twitter，FB和Google，想要国内主流网站的分享按钮还需要稍微设置一下。你有两个方法：<strong>找各个网站的分享按钮生成器：</strong>比如<a href="http://open.weibo.com/sharebutton">新浪微博分享按钮</a><strong>或者使用bshare：</strong></p>
+
+<p>修改你的<code>./source/_includes/posts/sharing.html</code>为</p>
+
+<figure class='code'><figcaption><span>sharing.html</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;bshare-custom&quot;</span><span class="nt">&gt;&lt;div</span> <span class="na">class=</span><span class="s">&quot;bsPromo bsPromo1&quot;</span><span class="nt">&gt;&lt;/div&gt;&lt;a</span> <span class="na">title=</span><span class="s">&quot;分享到QQ空间&quot;</span> <span class="na">class=</span><span class="s">&quot;bshare-qzone&quot;</span><span class="nt">&gt;&lt;/a&gt;&lt;a</span> <span class="na">title=</span><span class="s">&quot;分享到新浪微博&quot;</span> <span class="na">class=</span><span class="s">&quot;bshare-sinaminiblog&quot;</span><span class="nt">&gt;&lt;/a&gt;&lt;a</span> <span class="na">title=</span><span class="s">&quot;分享到人人网&quot;</span> <span class="na">class=</span><span class="s">&quot;bshare-renren&quot;</span><span class="nt">&gt;&lt;/a&gt;&lt;a</span> <span class="na">title=</span><span class="s">&quot;分享到腾讯微博&quot;</span> <span class="na">class=</span><span class="s">&quot;bshare-qqmb&quot;</span><span class="nt">&gt;&lt;/a&gt;&lt;a</span> <span class="na">title=</span><span class="s">&quot;分享到豆瓣&quot;</span> <span class="na">class=</span><span class="s">&quot;bshare-douban&quot;</span><span class="nt">&gt;&lt;/a&gt;&lt;a</span> <span class="na">title=</span><span class="s">&quot;更多平台&quot;</span> <span class="na">class=</span><span class="s">&quot;bshare-more bshare-more-icon more-style-addthis&quot;</span><span class="nt">&gt;&lt;/a&gt;&lt;span</span> <span class="na">class=</span><span class="s">&quot;BSHARE_COUNT bshare-share-count&quot;</span><span class="nt">&gt;</span>0<span class="nt">&lt;/span&gt;&lt;/div&gt;&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span> <span class="na">charset=</span><span class="s">&quot;utf-8&quot;</span> <span class="na">src=</span><span class="s">&quot;http://static.bshare.cn/b/button.js#style=-1&amp;amp;uuid=&amp;amp;pophcol=2&amp;amp;lang=zh&quot;</span><span class="nt">&gt;&lt;/script&gt;&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span> <span class="na">charset=</span><span class="s">&quot;utf-8&quot;</span> <span class="na">src=</span><span class="s">&quot;http://static.bshare.cn/b/bshareC0.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>或者你可以自己去<a href="http://www.bshare.cn/">bshare</a>注册一下，功能很多，还可以选择按钮样式。</p>
+
+<p><strong>两者的不同似乎在于，如果你使用新浪的分享按钮生成器，那么可以使用你的userid，在别人分享的时候会出现@yourname的形式；至于bshare，我没发现他有这个功能，可能是我比较菜的缘故，如果有人知道可以，请不吝告知；我自己也会抽空详细了解一下bshare的各种服务的。</strong></p>
+
+<p><strong>再提一点，最好把<code>_config.yml</code>里关于twitter之类的东西全都false掉～我是图方便直接重写了sharing.html；而bshare里有twitter和facebook，但是不能单独开/关了，只能是像以前那样加入if语句来控制整个bshare的开/关。</strong></p>
+
+<h2>域名绑定</h2>
+
+<p>在./source文件夹下新建一个文件CNAME，写入你要绑定的域名比如www.yourname.com什么的，然后到你的dns服务那里把www.yourname.com设置CNAME到你的yourname.github.com即可。</p>
+
+<h2>Octopress更新</h2>
+
+<p>定期更新一下octopress，官方有详细的<a href="http://octopress.org/docs/updating/">更新说明</a>       <br/>
+如果<code>$ git pull octopress master</code>报错：      <br/>
+<code>fatal: 'octopress' does not appear to be a git repository</code>的话     <br/>
+原因可能是没有相应的远程分支，在<code>./.git/config</code>里应该没有<code>[remote "octopress"]</code>块，需要添加一下      <br/>
+<code>$ git remote add octopress https://github.com/imathis/octopress.git</code></p>
+
+<h2>添加回到顶部按钮</h2>
+
+<p>是jquery的插件，动画效果不错。首先修改<code>./source/_includes/custom/head.html</code>文件，加入如下行：</p>
+
+<figure class='code'><figcaption><span>head.html</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="c">&lt;!-- jquery --&gt;</span> 
+</span><span class='line'><span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js&quot;</span> <span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+</span><span class='line'><span class="c">&lt;!-- easing plugin ( optional ) --&gt;</span>
+</span><span class='line'><span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;https://raw.github.com/sksmatt/UItoTop-jQuery-Plugin/master/js/easing.js&quot;</span> <span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+</span><span class='line'><span class="c">&lt;!-- UItoTop plugin --&gt;</span>
+</span><span class='line'><span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;https://raw.github.com/sksmatt/UItoTop-jQuery-Plugin/master/js/jquery.ui.totop.js&quot;</span> <span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+</span><span class='line'><span class="c">&lt;!-- Starting the plugin --&gt;</span>
+</span><span class='line'><span class="nt">&lt;script </span><span class="na">type=</span><span class="s">&quot;text/javascript&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      
+</span><span class='line'>      <span class="kd">var</span> <span class="nx">defaults</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>          <span class="nx">containerID</span><span class="o">:</span> <span class="s1">&#39;toTop&#39;</span><span class="p">,</span> <span class="c1">// fading element id</span>
+</span><span class='line'>          <span class="nx">containerHoverID</span><span class="o">:</span> <span class="s1">&#39;toTopHover&#39;</span><span class="p">,</span> <span class="c1">// fading element hover id</span>
+</span><span class='line'>          <span class="nx">scrollSpeed</span><span class="o">:</span> <span class="mi">1200</span><span class="p">,</span>
+</span><span class='line'>          <span class="nx">easingType</span><span class="o">:</span> <span class="s1">&#39;linear&#39;</span>
+</span><span class='line'>      <span class="p">};</span>
+</span><span class='line'>      
+</span><span class='line'>
+</span><span class='line'>      <span class="nx">$</span><span class="p">().</span><span class="nx">UItoTop</span><span class="p">({</span> <span class="nx">easingType</span><span class="o">:</span> <span class="s1">&#39;easeOutQuart&#39;</span> <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'><span class="nt">&lt;/script&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后修改<code>./source/stylesheets/screen.css</code>加入如下行：</p>
+
+<figure class='code'><figcaption><span>screen.css</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nf">#toTop</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">display</span><span class="o">:</span><span class="k">none</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">text-decoration</span><span class="o">:</span><span class="k">none</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">position</span><span class="o">:</span><span class="k">fixed</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">bottom</span><span class="o">:</span><span class="m">150px</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">right</span><span class="o">:</span><span class="m">100px</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">overflow</span><span class="o">:</span><span class="k">hidden</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">width</span><span class="o">:</span><span class="m">51px</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">height</span><span class="o">:</span><span class="m">51px</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">border</span><span class="o">:</span><span class="k">none</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">text-indent</span><span class="o">:</span><span class="m">100</span><span class="o">%</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">background</span><span class="o">:</span><span class="sx">url(https://raw.github.com/sksmatt/UItoTop-jQuery-Plugin/master/img/ui.totop.png)</span> <span class="k">no-repeat</span> <span class="k">left</span> <span class="k">top</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nf">#toTopHover</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">background</span><span class="o">:</span><span class="sx">url(https://raw.github.com/sksmatt/UItoTop-jQuery-Plugin/master/img/ui.totop.png)</span> <span class="k">no-repeat</span> <span class="k">left</span> <span class="m">-51px</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">width</span><span class="o">:</span><span class="m">51px</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">height</span><span class="o">:</span><span class="m">51px</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">display</span><span class="o">:</span><span class="k">block</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">overflow</span><span class="o">:</span><span class="k">hidden</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">float</span><span class="o">:</span><span class="k">left</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">opacity</span><span class="o">:</span> <span class="m">0</span><span class="p">;</span>
+</span><span class='line'>  <span class="o">-</span><span class="n">moz</span><span class="o">-</span><span class="k">opacity</span><span class="o">:</span> <span class="m">0</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">filter</span><span class="o">:</span><span class="n">alpha</span><span class="p">(</span><span class="k">opacity</span><span class="o">=</span><span class="m">0</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nf">#toTop</span><span class="nd">:active</span><span class="o">,</span> <span class="nf">#toTop</span><span class="nd">:focus</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">outline</span><span class="o">:</span><span class="k">none</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>貌似默认<code>screen.css</code>只有一长长长长长……行，所以gvim打开都会顿一下，这个新建一行就行。还有上面的地址是我找的按钮图标，不喜欢可以自己去找。   <br/>
+最后当然<code>$ rake generate;rake preview</code>看看效果～～</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Hello, World!]]></title>
+    <link href="http://www.shirui.me/blog/2013/01/21/hello/"/>
+    <updated>2013-01-21T00:04:00+08:00</updated>
+    <id>http://www.shirui.me/blog/2013/01/21/hello</id>
+    <content type="html"><![CDATA[<!--more-->
+
+
+<p>你好，世界！</p>
+
+<p><a href="https://raw.github.com/Shirui1989/blogmedia/master/Pic/施.jpg" rel="prettyPhoto" title="My logo"><img src="https://raw.github.com/Shirui1989/blogmedia/master/Pic/%E6%96%BD.jpg" width="250" height="250" alt="My Logo" /></a></p>
+]]></content>
+  </entry>
+  
+</feed>

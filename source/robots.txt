@@ -1,0 +1,15 @@
+---
+layout: nil
+---
+User-agent: *
+Disallow: /javascripts
+Disallow: /img
+Disallow: /_includes
+Disallow: /_layouts
+Disallow: /totop
+Disallow: /stylesheets
+Disallow: /pbox
+Disallow: /fancybox
+Disallow: /pp
+Sitemap: http://www.shirui.me/sitemap.xml
+Sitemap: {{ site.url }}/sitemap.xml

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: 语文 | ABlog]]></title>
+  <link href="http://www.shirui.me/blog/categories/语文/atom.xml" rel="self"/>
+  <link href="http://www.shirui.me/"/>
+  <updated>2013-01-31T21:01:42+08:00</updated>
+  <id>http://www.shirui.me/</id>
+  <author>
+    <name><![CDATA[施睿]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[十三辙韵]]></title>
+    <link href="http://www.shirui.me/blog/2013/01/22/shi-san-che-yun/"/>
+    <updated>2013-01-22T22:27:00+08:00</updated>
+    <id>http://www.shirui.me/blog/2013/01/22/shi-san-che-yun</id>
+    <content type="html"><![CDATA[<!--more-->
+
+
+<p>曲艺中的十三辙是从韵母的角度，将现代汉语北京音系的音节分成为十三大类：  <br/>
+一、 中东辙，或叫中东韵（下同）：eng、ing、ong、iong、ueng  <br/>
+二、 江阳辙：ang、iang、uang  <br/>
+三、 人辰辙：en、in、uen、un  <br/>
+四、 言前辙：an、ian、uan  <br/>
+五、 由求辙：ou、iou、iu  <br/>
+六、 遥条辙：ao、iao  <br/>
+七、 灰堆辙：ei、uei、ui  <br/>
+八、 怀来辙：ai、uai  <br/>
+九、 发花辙：a、ia、ua  <br/>
+十、 缺斜辙：ie、ue  <br/>
+十一、 梭波辙：e、o、uo  <br/>
+十二、 衣七辙： i、u、er  <br/>
+十三、 姑苏辙：u</p>
+]]></content>
+  </entry>
+  
+</feed>

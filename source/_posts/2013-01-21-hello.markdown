@@ -1,0 +1,12 @@
+---
+layout: post
+title: "Hello, World!"
+date: 2013-01-21 00:04
+comments: true
+categories: [计算机,其他]
+---
+<!--more-->
+你好，世界！
+{% raw %}
+<a href="https://raw.github.com/Shirui1989/blogmedia/master/Pic/施.jpg" rel="prettyPhoto" title="My logo"><img src="https://raw.github.com/Shirui1989/blogmedia/master/Pic/%E6%96%BD.jpg" width="250" height="250" alt="My Logo" /></a>
+{% endraw %}
