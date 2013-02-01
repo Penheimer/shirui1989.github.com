@@ -4,7 +4,7 @@
   <title><![CDATA[Category: lisp | ABlog]]></title>
   <link href="http://www.shirui.me/blog/categories/lisp/atom.xml" rel="self"/>
   <link href="http://www.shirui.me/"/>
-  <updated>2013-02-01T20:00:02+08:00</updated>
+  <updated>2013-02-01T20:29:37+08:00</updated>
   <id>http://www.shirui.me/</id>
   <author>
     <name><![CDATA[施睿]]></name>
@@ -27,7 +27,7 @@
 <code>(week-days-indicator month day year)</code>计算当天是星期几。     <br/>
 包含了1752年9月的特殊(<code>cal 9 1752</code>看看)，并且考虑到了1800年前后整百年份闰年定义方法的不同（1800年以后整百年份是整除400方为闰年，以前只要是整除4即是)。     <br/>
 P.S.最后<code>(dairy year)</code>是苦逼屌丝周年日记。XD
-``` python ds.lisp
+``` cl ds.lisp
 (defun month-length (month year) ;;月长，1800年以前的闰年算法不一样……shit
   (case month</p>
 
