@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: 其他 | ABlog]]></title>
+  <link href="http://www.shirui.me/blog/categories/其他/atom.xml" rel="self"/>
+  <link href="http://www.shirui.me/"/>
+  <updated>2013-02-01T18:53:57+08:00</updated>
+  <id>http://www.shirui.me/</id>
+  <author>
+    <name><![CDATA[施睿]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Hello, World!]]></title>
+    <link href="http://www.shirui.me/blog/2013/01/21/hello/"/>
+    <updated>2013-01-21T00:04:00+08:00</updated>
+    <id>http://www.shirui.me/blog/2013/01/21/hello</id>
+    <content type="html"><![CDATA[<!--more-->
+
+
+<p>你好，世界！
+
+<a href="https://raw.github.com/Shirui1989/blogmedia/master/Pic/施.jpg" rel="prettyPhoto" title="My logo"><img src="https://raw.github.com/Shirui1989/blogmedia/master/Pic/%E6%96%BD.jpg" width="250" height="250" alt="My Logo" /></a>
+</p>
+]]></content>
+  </entry>
+  
+</feed>
