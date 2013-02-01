@@ -2,59 +2,59 @@ $noise-bg: image-url('noise.png') top left !default;
 $img-border: inline-image('dotted-border.png');
 
 // Main Link Colors
-$link-color: lighten(#165b94, 3) !default;
+$link-color: #5dbbce !default;
 $link-color-hover: adjust-color($link-color, $lightness: 10, $saturation: 25) !default;
 $link-color-visited: adjust-color($link-color, $hue: 80, $lightness: -4) !default;
 $link-color-active: adjust-color($link-color-hover, $lightness: -15) !default;
 
 // Main Section Colors
-$main-bg: #282e39 !default;
-$page-bg: #282e39 !default;
-$article-border: #3b4452 !default;
+$main-bg: #e0e4cc !default;
+$page-bg: #e0e4cc !default;
+$article-border: #cbcbb6 !default;
 
-$header-bg: #282e39 !default;
+$header-bg: #e0e4cc !default;
 $header-border: lighten($header-bg, 15) !default;
-$title-color: #dd5363 !default;
-$subtitle-color: #8f9ba8 !default;
+$title-color: #f38630 !default;
+$subtitle-color: #67677e !default;
 
-$text-color: #8f9ba8 !default;
+$text-color: #67677e !default;
 $text-color-light: #a8a8a8 !default;
 $type-border: #a8a8a8 !default;
 
 /* Navigation */
-$nav-bg: #282e39 !default;
+$nav-bg: #e0e4cc !default;
 $nav-bg-front: none;
 $nav-bg-back: none;
-$nav-color: #8f9ba8;
+$nav-color: #67677e;
 $nav-color-hover: darken($nav-color, 25) !default;
 $nav-placeholder: desaturate(darken($nav-bg, 10), 15) !default;
 $nav-border: darken($nav-bg, 10) !default;
-$nav-border-top: #3b4452;
-$nav-border-bottom: #3b4452;
+$nav-border-top: #cbcbb6;
+$nav-border-bottom: #cbcbb6;
 $nav-border-left: none;
 $nav-border-right: none;
 
 /* Sidebar colors */
-$sidebar-bg: #282e39 !default;
+$sidebar-bg: #e0e4cc !default;
 $sidebar-link-color: $link-color !default;
 $sidebar-link-color-hover: $link-color-hover !default;
 $sidebar-link-color-active: $link-color-active !default;
-$sidebar-color: change-color(mix($text-color, $sidebar-bg, 80), $hue: hue($sidebar-bg), $saturation: saturation($sidebar-bg)/2) !default;
-$sidebar-border: #3b4452;
+$sidebar-color: $text-color !default;
+$sidebar-border: #cbcbb6;
 $sidebar-border-hover: darken($sidebar-bg, 7) !default;
 $sidebar-link-color-subdued: lighten($sidebar-color, 20) !default;
 $sidebar-link-color-subdued-hover: $sidebar-link-color-hover !default;
 $twitter-status-link: lighten($sidebar-link-color-subdued, 15) !default;
 
-$footer-color: #8f9ba8 !default;
-$footer-bg: #282e39 !default;
+$footer-color: #67677e !default;
+$footer-bg: #e0e4cc !default;
 $footer-bg-front: none;
 $footer-bg-back: none;
 $footer-color-hover: darken($footer-color, 10) !default;
-$footer-border-top: #3b4452;
-$footer-border-bottom: #3b4452;
-$footer-link-color: lighten($footer-bg, 25) !default;
-$footer-link-color-hover: lighten($footer-color, 38) !default;
+$footer-border-top: #cbcbb6;
+$footer-border-bottom: #cbcbb6;
+$footer-link-color: darken($footer-bg, 30) !default;
+$footer-link-color-hover: darken($footer-color, 35) !default;
 $page-border-bottom: darken($footer-bg, 5) !default;
 
 
