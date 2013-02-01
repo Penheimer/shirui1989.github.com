@@ -13,7 +13,7 @@ Common Lisp实现输入日期计算当天是星期几，并可以计算从某年
 `(week-days-indicator month day year)`计算当天是星期几。		
 包含了1752年9月的特殊(`cal 9 1752`看看)，并且考虑到了1800年前后整百年份闰年定义方法的不同（1800年以后整百年份是整除400方为闰年，以前只要是整除4即是)。		
 P.S.最后`(dairy year)`是苦逼屌丝周年日记。XD
-``` python ds.lisp
+``` cl ds.lisp
 (defun month-length (month year) ;;月长，1800年以前的闰年算法不一样……shit
   (case month
     ((1 3 5 7 8 10 12) 31)
