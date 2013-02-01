@@ -4,7 +4,7 @@
   <title><![CDATA[ABlog]]></title>
   <link href="http://www.shirui.me/atom.xml" rel="self"/>
   <link href="http://www.shirui.me/"/>
-  <updated>2013-02-01T18:53:57+08:00</updated>
+  <updated>2013-02-01T19:39:59+08:00</updated>
   <id>http://www.shirui.me/</id>
   <author>
     <name><![CDATA[施睿]]></name>
@@ -12,6 +12,60 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Octopress在Archlinux中代码高亮问题]]></title>
+    <link href="http://www.shirui.me/blog/2013/02/01/octopress-on-arch/"/>
+    <updated>2013-02-01T19:08:00+08:00</updated>
+    <id>http://www.shirui.me/blog/2013/02/01/octopress-on-arch</id>
+    <content type="html"><![CDATA[<!--more-->
+
+
+<h2>关于自带代码高亮的问题</h2>
+
+<p>自带代码高亮是用</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="sb">```</span> <span class="o">[</span>lang<span class="o">]</span> <span class="o">[</span>filename<span class="o">]</span>
+</span><span class='line'><span class="sb">```</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>的形式来解决的，但是在Arch下<code>rake generate</code>总会报错，经查是Python版本的问题，代码高亮使用的是python2但是arch下默认的python是python3，经过一番折腾终于解决了问题。        <br/>
+首先安装<a href="https://wiki.archlinux.org/index.php/Python_VirtualEnv">python-virtualenvwrapper</a>：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>sudo pacman -S python-virtualenvwrapper
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后进行如下配置（本人zsh）：</p>
+
+<figure class='code'><figcaption><span>zsh.sh</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">export </span><span class="nv">WORKON_HOME</span><span class="o">=</span><span class="nv">$HOME</span>/.virtualenvs &gt;&gt; ~/.zshenv
+</span><span class='line'><span class="nv">$ </span>mkdir -p <span class="nv">$WORKON_HOME</span>
+</span><span class='line'><span class="nv">$ </span><span class="nb">source</span> /usr/bin/virtualenvwrapper.sh
+</span><span class='line'><span class="nv">$ </span>mkvirtualenv -p python2.7 --distribute blog_env
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>之后把<code>source /usr/bin/virtualenvwrapper.sh</code>加入到<code>~/.zshrc</code>里面确保每次zsh启动都能运行。    <br/>
+使用方法：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">cd</span> &lt;path-to-your-blog-dir&gt;
+</span><span class='line'><span class="nv">$ </span>workon blog_env
+</span><span class='line'><span class="nv">$ </span>bundle <span class="nb">exec </span>rake generate
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[cl任意日期计算星期几]]></title>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 博客相关 | ABlog]]></title>
   <link href="http://www.shirui.me/blog/categories/博客相关/atom.xml" rel="self"/>
   <link href="http://www.shirui.me/"/>
-  <updated>2013-02-01T18:53:57+08:00</updated>
+  <updated>2013-02-01T19:39:59+08:00</updated>
   <id>http://www.shirui.me/</id>
   <author>
     <name><![CDATA[施睿]]></name>
@@ -12,6 +12,46 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Octopress在Archlinux中代码高亮问题]]></title>
+    <link href="http://www.shirui.me/blog/2013/02/01/octopress-on-arch/"/>
+    <updated>2013-02-01T19:08:00+08:00</updated>
+    <id>http://www.shirui.me/blog/2013/02/01/octopress-on-arch</id>
+    <content type="html"><![CDATA[<!--more-->
+
+
+<h2>关于自带代码高亮的问题</h2>
+
+<p>自带代码高亮是用
+``` sh</p>
+
+<pre><code>``` [lang] [filename]
+```
+</code></pre>
+
+<p><code>
+的形式来解决的，但是在Arch下`rake generate`总会报错，经查是Python版本的问题，代码高亮使用的是python2但是arch下默认的python是python3，经过一番折腾终于解决了问题。          
+首先安装[python-virtualenvwrapper](https://wiki.archlinux.org/index.php/Python_VirtualEnv)：
+</code> sh
+$ sudo pacman -S python-virtualenvwrapper
+<code>
+然后进行如下配置（本人zsh）：
+</code> sh zsh.sh
+$ export WORKON_HOME=$HOME/.virtualenvs >> ~/.zshenv
+$ mkdir -p $WORKON_HOME
+$ source /usr/bin/virtualenvwrapper.sh
+$ mkvirtualenv -p python2.7 --distribute blog_env
+<code>
+之后把`source /usr/bin/virtualenvwrapper.sh`加入到`~/.zshrc`里面确保每次zsh启动都能运行。      
+使用方法：
+</code> sh
+$ cd <path-to-your-blog-dir>
+$ workon blog_env
+$ bundle exec rake generate
+```</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Octopress设置]]></title>
