@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 其他 | ABlog]]></title>
   <link href="http://www.shirui.me/blog/categories/其他/atom.xml" rel="self"/>
   <link href="http://www.shirui.me/"/>
-  <updated>2013-02-15T00:34:09+08:00</updated>
+  <updated>2013-02-15T00:55:26+08:00</updated>
   <id>http://www.shirui.me/</id>
   <author>
     <name><![CDATA[施睿]]></name>
@@ -22,9 +22,9 @@
 
 
 <p>你好，世界！
-{% raw %}
+
 <a href="https://raw.github.com/Shirui1989/blogmedia/master/Pic/施.jpg" rel="prettyPhoto" title="My logo"><img src="https://raw.github.com/Shirui1989/blogmedia/master/Pic/%E6%96%BD.jpg" width="250" height="250" alt="My Logo" /></a>
-{% endraw %}</p>
+</p>
 ]]></content>
   </entry>
   

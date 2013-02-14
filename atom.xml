@@ -4,7 +4,7 @@
   <title><![CDATA[ABlog]]></title>
   <link href="http://www.shirui.me/atom.xml" rel="self"/>
   <link href="http://www.shirui.me/"/>
-  <updated>2013-02-05T23:58:11+08:00</updated>
+  <updated>2013-02-15T00:55:26+08:00</updated>
   <id>http://www.shirui.me/</id>
   <author>
     <name><![CDATA[施睿]]></name>
@@ -512,6 +512,50 @@ P.S.最后<code>(dairy year)</code>是苦逼屌丝周年日记。XD</p>
 
 <h2>Octopress的工作方式</h2>
 
+<p>这一点是我折腾各种东西包括新浪侧边栏、Fancybox等的一点总结，写在下面的内容之前。          <br/>
+Octopress似乎是在本地生成好一个静态的网站然后上传的github的，写博文和新页面都是使用markdown文档，octopress真正的插件（plugins）是一些<code>.rb</code>的文件，在octopress根目录下的plugins文件夹里，在md文档中的用法也是</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="o">{</span>% .... %<span class="o">}</span>
+</span><span class='line'>    content
+</span><span class='line'><span class="o">{</span>% end.... %<span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>的形式，当然md文档还有个好处是直接能用html，这对于我这个不会写插件的菜鸟来说是巨大的福音，譬如Fancybox，有位大牛就给Fancybox写了插件——<a href="http://tritarget.org/blog/2012/05/07/integrating-photos-into-octopress-using-fancybox-and-plugin/">点这里</a>——里面写有具体的用法。       <br/>
+我也使用了fancybox，但是没有用他的插件，比如这篇文章顶端的可爱的小章鱼，我插入那张图片只是简单地使用了如下代码：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;a</span> <span class="na">class=</span><span class="s">&quot;fsingle&quot;</span> <span class="na">href=</span><span class="s">&quot;http://drupal.org/files/project-images/octopress.png&quot;</span> <span class="na">title=</span><span class="s">&quot;Ocotpress&quot;</span><span class="nt">&gt;&lt;img</span> <span class="na">src=</span><span class="s">&quot;http://drupal.org/files/project-images/octopress.png&quot;</span> <span class="na">class=</span><span class="s">&quot;right&quot;</span> <span class="na">width=</span><span class="s">&quot;150&quot;</span> <span class="na">hight=</span><span class="s">&quot;112.5&quot;</span><span class="nt">&gt;&lt;/a&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>的确比插件麻烦了不止一点半点……不过挺好用。      <br/>
+由于octopress是把md文件生成html的，那我就得提一下html，我没学过html，但是有一点点的编程基础，兼之这段时间一直折腾octopress，所以有了个大概的理解；一个octopress文章页面似乎用了如下模板：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;html&gt;</span>
+</span><span class='line'><span class="nt">&lt;head&gt;</span>
+</span><span class='line'><span class="c">&lt;!--这里是各种js，css，字体什么的。--&gt;</span>
+</span><span class='line'><span class="err">&lt;</span>\head&gt;
+</span><span class='line'><span class="nt">&lt;body&gt;</span>
+</span><span class='line'><span class="c">&lt;!--这里是主体内容，包括文章，评论，边栏，分享按钮，还有脚注。--&gt;</span>
+</span><span class='line'><span class="err">&lt;</span>\body&gt;
+</span><span class='line'><span class="nt">&lt;html&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>大概带着这个框架，去看<code>source/_includes</code>文件夹下的文件，就不难明白，Octopress把这个模板分成了几个部分：<code>&lt;head&gt;&lt;/head&gt;</code>中的内容在<code>head.html</code>文件里，这个文件是一些基础信息，最底下还有几个<code>{% include ... %}</code>字样的行，表示包含<code>source/_includes</code>文件夹下的其他html文件。</p>
+
 <h2>新浪微博边栏</h2>
 
 <p>去<a href="http://weibo.com/tool/weiboshow">微博秀</a>生成一下代码，注意看里面对应的各种信息比如userid等等。然后在<code>./source/_includes/asides/</code>下建立一个weibo.html：</p>
@@ -533,10 +577,7 @@ P.S.最后<code>(dairy year)</code>是苦逼屌丝周年日记。XD</p>
 <span class='line-number'>15</span>
 <span class='line-number'>16</span>
 <span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='html'><span class='line'>
-</span><span class='line'>{% if site.weibo_uid %}
+</pre></td><td class='code'><pre><code class='html'><span class='line'>{% if site.weibo_uid %}
 </span><span class='line'><span class="nt">&lt;section&gt;</span>
 </span><span class='line'>  <span class="nt">&lt;ul</span> <span class="na">id=</span><span class="s">&quot;weibo&quot;</span><span class="nt">&gt;</span>
 </span><span class='line'>    <span class="nt">&lt;li&gt;</span>
@@ -553,7 +594,6 @@ P.S.最后<code>(dairy year)</code>是苦逼屌丝周年日记。XD</p>
 </span><span class='line'><span class="nt">&lt;/section&gt;</span>
 </span><span class='line'>{% endif %}
 </span><span class='line'><span class="c">&lt;!--src=这一行除了一些改为可以在_config.yml里设置的，其余的配置比如边框什么的具体对照新浪的生成，e.g. isfans=0表示不显示粉丝--&gt;</span>
-</span><span class='line'>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -625,10 +665,7 @@ P.S.最后<code>(dairy year)</code>是苦逼屌丝周年日记。XD</p>
 <span class='line-number'>28</span>
 <span class='line-number'>29</span>
 <span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-</pre></td><td class='code'><pre><code class='html'><span class='line'>
-</span><span class='line'><span class="nt">&lt;div&gt;</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;div&gt;</span>
 </span><span class='line'><span class="nt">&lt;article</span> <span class="na">class=</span><span class="s">&quot;hentry&quot;</span> <span class="na">role=</span><span class="s">&quot;article&quot;</span><span class="nt">&gt;</span>
 </span><span class='line'><span class="c">&lt;!--&gt;......上面接原有&lt;!--&gt;</span>
 </span><span class='line'>{% if site.disqus_short_name and page.comments == true %}
@@ -658,7 +695,6 @@ P.S.最后<code>(dairy year)</code>是苦逼屌丝周年日记。XD</p>
 </span><span class='line'>{% endif %}
 </span><span class='line'><span class="c">&lt;!--&gt;添加部分结束&lt;!--&gt;</span>
 </span><span class='line'><span class="nt">&lt;/div&gt;</span> <span class="c">&lt;!--&gt;整个在&lt;div&gt;&lt;article....一节里，不然“发表评论”四个字会顶格。&lt;!--&gt;</span>
-</span><span class='line'>
 </span></code></pre></td></tr></table></div></figure>
 
 
