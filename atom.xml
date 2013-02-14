@@ -4,7 +4,7 @@
   <title><![CDATA[ABlog]]></title>
   <link href="http://www.shirui.me/atom.xml" rel="self"/>
   <link href="http://www.shirui.me/"/>
-  <updated>2013-02-01T21:52:00+08:00</updated>
+  <updated>2013-02-05T23:58:11+08:00</updated>
   <id>http://www.shirui.me/</id>
   <author>
     <name><![CDATA[施睿]]></name>
@@ -464,7 +464,14 @@ P.S.最后<code>(dairy year)</code>是苦逼屌丝周年日记。XD</p>
     <link href="http://www.shirui.me/blog/2013/01/22/octopress/"/>
     <updated>2013-01-22T17:01:00+08:00</updated>
     <id>http://www.shirui.me/blog/2013/01/22/octopress</id>
-    <content type="html"><![CDATA[<!--more-->
+    <content type="html"><![CDATA[<h2>为什么Octopress ?</h2>
+
+<p><a class="fsingle" href="http://drupal.org/files/project-images/octopress.png" title="Ocotpress"><img src="http://drupal.org/files/project-images/octopress.png" class="right" width="150" hight="112.5"></a>
+这个基本上搜索一下<code>octopress</code>就得到了，有各种技术参数的分析和详细的介绍blablabla的一堆……</p>
+
+<p>但是对于我，就一个很简单的理由——小章鱼太萌了——我喜欢萌物。</p>
+
+<!--more-->
 
 
 <h2>Git设置</h2>
@@ -503,7 +510,9 @@ P.S.最后<code>(dairy year)</code>是苦逼屌丝周年日记。XD</p>
 <code>rake generate</code>生成页面，<code>rake deploy</code>来发表；
 或者直接<code>rake gen_deploy</code>；每当你修改主题或者发表文章什么的都需要这么做。<strong>注意修改_config.yml里对应的信息，比如url就是你的xxxx.github.com等等。</strong></p>
 
-<h2>新浪微博插件</h2>
+<h2>Octopress的工作方式</h2>
+
+<h2>新浪微博边栏</h2>
 
 <p>去<a href="http://weibo.com/tool/weiboshow">微博秀</a>生成一下代码，注意看里面对应的各种信息比如userid等等。然后在<code>./source/_includes/asides/</code>下建立一个weibo.html：</p>
 

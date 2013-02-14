@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 计算机 | ABlog]]></title>
   <link href="http://www.shirui.me/blog/categories/计算机/atom.xml" rel="self"/>
   <link href="http://www.shirui.me/"/>
-  <updated>2013-02-01T21:52:00+08:00</updated>
+  <updated>2013-02-15T00:34:09+08:00</updated>
   <id>http://www.shirui.me/</id>
   <author>
     <name><![CDATA[施睿]]></name>
@@ -230,7 +230,14 @@ rulesepcolor=\color{red!20!green!20!blue!20}}
     <link href="http://www.shirui.me/blog/2013/01/22/octopress/"/>
     <updated>2013-01-22T17:01:00+08:00</updated>
     <id>http://www.shirui.me/blog/2013/01/22/octopress</id>
-    <content type="html"><![CDATA[<!--more-->
+    <content type="html"><![CDATA[<h2>为什么Octopress ?</h2>
+
+<p>{% raw %}<a class="fsingle" href="http://drupal.org/files/project-images/octopress.png" title="Ocotpress"><img src="http://drupal.org/files/project-images/octopress.png" class="right" width="150" hight="112.5"></a>{% endraw %}
+这个基本上搜索一下<code>octopress</code>就得到了，有各种技术参数的分析和详细的介绍blablabla的一堆……</p>
+
+<p>但是对于我，就一个很简单的理由——小章鱼太萌了——我喜欢萌物。</p>
+
+<!--more-->
 
 
 <h2>Git设置</h2>
@@ -257,11 +264,48 @@ $ rake setup_github_pages # 设置你有读写权限的git repo，格式它有�
 <code>rake generate</code>生成页面，<code>rake deploy</code>来发表；
 或者直接<code>rake gen_deploy</code>；每当你修改主题或者发表文章什么的都需要这么做。<strong>注意修改_config.yml里对应的信息，比如url就是你的xxxx.github.com等等。</strong></p>
 
-<h2>新浪微博插件</h2>
+<h2>Octopress的工作方式</h2>
+
+<p>这一点是我折腾各种东西包括新浪侧边栏、Fancybox等的一点总结，写在下面的内容之前。          <br/>
+Octopress似乎是在本地生成好一个静态的网站然后上传的github的，写博文和新页面都是使用markdown文档，octopress真正的插件（plugins）是一些<code>.rb</code>的文件，在octopress根目录下的plugins文件夹里，在md文档中的用法也是
+``` sh</p>
+
+<pre><code>{% .... %}
+content
+{% end.... %}
+</code></pre>
+
+<p><code>
+的形式，当然md文档还有个好处是直接能用html，这对于我这个不会写插件的菜鸟来说是巨大的福音，譬如Fancybox，有位大牛就给Fancybox写了插件——[点这里](http://tritarget.org/blog/2012/05/07/integrating-photos-into-octopress-using-fancybox-and-plugin/)——里面写有具体的用法。         
+我也使用了fancybox，但是没有用他的插件，比如这篇文章顶端的可爱的小章鱼，我插入那张图片只是简单地使用了如下代码：
+</code> html
+<a class="fsingle" href="http://drupal.org/files/project-images/octopress.png" title="Ocotpress"><img src="http://drupal.org/files/project-images/octopress.png" class="right" width="150" hight="112.5"></a>
+<code>
+的确比插件麻烦了不止一点半点……不过挺好用。        
+由于octopress是把md文件生成html的，那我就得提一下html，我没学过html，但是有一点点的编程基础，兼之这段时间一直折腾octopress，所以有了个大概的理解；一个octopress文章页面似乎用了如下模板：
+</code> html
+<html>
+<head></p>
+
+<!--这里是各种js，css，字体什么的。-->
+
+
+<p>&lt;\head>
+<body></p>
+
+<!--这里是主体内容，包括文章，评论，边栏，分享按钮，还有脚注。-->
+
+
+<p>&lt;\body>
+<html>
+<code>``
+大概带着这个框架，去看</code>source/<em>includes<code>文件夹下的文件，就不难明白，Octopress把这个模板分成了几个部分：</code><head></head><code>中的内容在</code>head.html<code>文件里，这个文件是一些基础信息，最低下还有几个</code>{% include ... %}<code>字样的行，表示包含</code>source/</em>includes`文件夹下的其他html文件。</p>
+
+<h2>新浪微博边栏</h2>
 
 <p>去<a href="http://weibo.com/tool/weiboshow">微博秀</a>生成一下代码，注意看里面对应的各种信息比如userid等等。然后在<code>./source/_includes/asides/</code>下建立一个weibo.html：
 ``` html weibo.html
-
+{% raw %}
 {% if site.weibo_uid %}<br/>
 <section><br/>
   <ul id="weibo"></p>
@@ -285,7 +329,7 @@ $ rake setup_github_pages # 设置你有读写权限的git repo，格式它有�
 <!--src=这一行除了一些改为可以在_config.yml里设置的，其余的配置比如边框什么的具体对照新浪的生成，e.g. isfans=0表示不显示粉丝-->
 
 
-<p>
+<p>{% endraw %}
 <code>
 然后在./_config.yml文件里添加
 </code> sh
@@ -315,7 +359,7 @@ disqus_show_comment_count: true
 <p><strong>目前貌似disqus会挂……所以附上多说的部分，其实还有灯鹭和友言，不过大同小异——</strong>        <br/>
 首先在<code>./source/_layouts/post(还有page).html</code>里均<strong>添加如下内容在原有disqus那节下面</strong>(page.html是控制页面上是否出现评论，post.html是博文里是否出现评论，两个文件都需要添加)：
 ``` html page&amp;post.html
-</p>
+{% raw %}</p>
 
 <div>
 <article class="hentry" role="article">
@@ -350,7 +394,7 @@ disqus_show_comment_count: true
 
 
 <p> <!-->整个在<div>&lt;article....一节里，不然“发表评论”四个字会顶格。<!-->
-
+{% endraw %}
 <code>
 然后在`./_config.yml`里添加
 </code> sh
@@ -498,9 +542,9 @@ filter:alpha(opacity=0);
 
 
 <p>你好，世界！
-
+{% raw %}
 <a href="https://raw.github.com/Shirui1989/blogmedia/master/Pic/施.jpg" rel="prettyPhoto" title="My logo"><img src="https://raw.github.com/Shirui1989/blogmedia/master/Pic/%E6%96%BD.jpg" width="250" height="250" alt="My Logo" /></a>
-</p>
+{% endraw %}</p>
 ]]></content>
   </entry>
   
