@@ -2,30 +2,30 @@ $noise-bg: image-url('noise.png') top left !default;
 $img-border: inline-image('dotted-border.png');
 
 // Main Link Colors
-$link-color: #5dbbce !default;
+$link-color: #bcc6b0 !default;
 $link-color-hover: adjust-color($link-color, $lightness: 10, $saturation: 25) !default;
 $link-color-visited: adjust-color($link-color, $hue: 80, $lightness: -4) !default;
 $link-color-active: adjust-color($link-color-hover, $lightness: -15) !default;
 
 // Main Section Colors
-$main-bg: #e0e4cc !default;
-$page-bg: #e0e4cc !default;
+$main-bg: #625266 !default;
+$page-bg: #625266 !default;
 $article-border: #cbcbb6 !default;
 
-$header-bg: #e0e4cc !default;
+$header-bg: #625266 !default;
 $header-border: lighten($header-bg, 15) !default;
-$title-color: #f38630 !default;
-$subtitle-color: #67677e !default;
+$title-color: #c8cbb5 !default;
+$subtitle-color: #ded8df !default;
 
-$text-color: #67677e !default;
+$text-color: #ded8df !default;
 $text-color-light: #a8a8a8 !default;
 $type-border: #a8a8a8 !default;
 
 /* Navigation */
-$nav-bg: #e0e4cc !default;
+$nav-bg: #625266 !default;
 $nav-bg-front: none;
 $nav-bg-back: none;
-$nav-color: #67677e;
+$nav-color: #ded8df;
 $nav-color-hover: darken($nav-color, 25) !default;
 $nav-placeholder: desaturate(darken($nav-bg, 10), 15) !default;
 $nav-border: darken($nav-bg, 10) !default;
@@ -35,7 +35,7 @@ $nav-border-left: none;
 $nav-border-right: none;
 
 /* Sidebar colors */
-$sidebar-bg: #e0e4cc !default;
+$sidebar-bg: #625266 !default;
 $sidebar-link-color: $link-color !default;
 $sidebar-link-color-hover: $link-color-hover !default;
 $sidebar-link-color-active: $link-color-active !default;
@@ -46,8 +46,8 @@ $sidebar-link-color-subdued: lighten($sidebar-color, 20) !default;
 $sidebar-link-color-subdued-hover: $sidebar-link-color-hover !default;
 $twitter-status-link: lighten($sidebar-link-color-subdued, 15) !default;
 
-$footer-color: #67677e !default;
-$footer-bg: #e0e4cc !default;
+$footer-color: #ded8df !default;
+$footer-bg: #625266 !default;
 $footer-bg-front: none;
 $footer-bg-back: none;
 $footer-color-hover: darken($footer-color, 10) !default;

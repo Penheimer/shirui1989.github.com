@@ -1,3 +1,6 @@
 [submodule ".themes/bunching-bumbago"]
 	path = .themes/bunching-bumbago
 	url = git://github.com/octopress-themes/bunching-bumbago.git
+[submodule ".themes/bucktooth-bumbago"]
+	path = .themes/bucktooth-bumbago
+	url = git://github.com/octopress-themes/bucktooth-bumbago.git
