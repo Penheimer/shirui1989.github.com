@@ -1,40 +1,39 @@
 <!doctype html>
 <html>
 <head>
-<script type="text/javascript">
-function getOs() 
-{ 
-     var OsObject = ""; 
-    if(navigator.userAgent.indexOf("MSIE")>0) { 
-         return "MSIE"; 
-    } 
-    if(isFirefox=navigator.userAgent.indexOf("Firefox")>0){ 
-         return "Firefox"; 
-    } 
-    if(isSafari=navigator.userAgent.indexOf("Safari")>0) { 
-         return "Webkit"; 
-    }  
-    if(isCamino=navigator.userAgent.indexOf("Camino")>0){ 
-         return "Camino"; 
-    } 
-    if(isMozilla=navigator.userAgent.indexOf("Gecko/")>0){ 
-         return "Gecko"; 
-    } 
+  <script type="text/javascript">
+    function getOs() 
+    { 
+      var OsObject = ""; 
+      if(navigator.userAgent.indexOf("MSIE")>0) { 
+          return "MSIE"; 
+      } 
+        if(isFirefox=navigator.userAgent.indexOf("Firefox")>0){ 
+          return "Firefox"; 
+      } 
+        if(isSafari=navigator.userAgent.indexOf("Safari")>0) { 
+          return "Webkit"; 
+      }  
+        if(isCamino=navigator.userAgent.indexOf("Camino")>0){ 
+          return "Camino"; 
+      } 
+        if(isMozilla=navigator.userAgent.indexOf("Gecko/")>0){ 
+          return "Gecko"; 
+      } 
    
-} 
-var isIE=getOs();
+    } 
+    var isIE=getOs();
 
-if (isIE=="MSIE")
-	{
-	alert("作者很讨厌IE浏览器，请用Firefox或者Chrome浏览本网页！用IE的朋友请自觉转向腾讯。");
-	navigate("http://www.qq.com");
-	}
-else
-	{
-	pass;
-	}
-
-</script>
+    if (isIE=="MSIE")
+      {
+      alert("作者很讨厌IE浏览器，请用Firefox或者Chrome浏览本网页！用IE的朋友请自觉转向腾讯。");
+      navigate("http://www.qq.com");
+      }
+    else
+    {
+     pass;
+    }
+  </script>
 <script type="text/javascript">
 
   var _gaq = _gaq || [];
